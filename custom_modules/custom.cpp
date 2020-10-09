@@ -153,9 +153,9 @@ void create_cell_types( void )
 	int sub_index = microenvironment.find_density_index( "substrate" ); 
 	// enable random motility 
 	CellA.phenotype.motility.is_motile = false; 
-	CellA.phenotype.secretion.uptake_rates[sub_index] = 0; 
-	CellA.phenotype.secretion.secretion_rates[sub_index] = 1; 
-	CellA.phenotype.secretion.saturation_densities[sub_index] = 100; 
+	//CellA.phenotype.secretion.uptake_rates[sub_index] = 0; 
+	//CellA.phenotype.secretion.secretion_rates[sub_index] = 0; 
+	//CellA.phenotype.secretion.saturation_densities[sub_index] = 100; 
 	//CellA.phenotype.geometry.radius=100;
 	CellA.phenotype.volume.multiply_by_ratio(50);
 	//CellA.phenotype.motility.persistence_time = parameters.doubles( "CellA_persistence_time" ); // 15.0; 

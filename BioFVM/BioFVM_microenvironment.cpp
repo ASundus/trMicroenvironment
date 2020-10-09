@@ -240,7 +240,8 @@ void Microenvironment::set_substrate_dirichlet_activation( int substrate_index ,
 
 void Microenvironment::set_substrate_dirichlet_activation( int index, std::vector<bool>& new_value )
 {
-	dirichlet_activation_vectors[index] = new_value; 
+	dirichlet_activation_vectors[index] = new_value;
+	
 	return; 
 }
 
@@ -255,6 +256,8 @@ bool Microenvironment::get_substrate_dirichlet_activation( int substrate_index )
 void Microenvironment::set_substrate_dirichlet_activation( int substrate_index , int index, bool new_value )
 {
 	dirichlet_activation_vectors[index][substrate_index] = new_value; 
+	
+	std::cout<<"Yes I was called";
 	return; 
 }
 
