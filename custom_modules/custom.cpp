@@ -119,7 +119,7 @@ void create_cell_types( void )
 	// first find index for a few key variables. 
 	int apoptosis_model_index = cell_defaults.phenotype.death.find_death_model_index( "Apoptosis" );
 	int necrosis_model_index = cell_defaults.phenotype.death.find_death_model_index( "Necrosis" );
-	//int oxygen_substrate_index = microenvironment.find_density_index( "oxygen" ); 
+	int oxygen_substrate_index = microenvironment.find_density_index( "oxygen" ); 
 
 	//int live_index = live_cycle_model.find_phase_index( PhysiCell_constants::live );
 	//int S_index = flow_cytometry_separated_cycle_model.find_phase_index( PhysiCell_constants::S_phase );
@@ -129,9 +129,9 @@ void create_cell_types( void )
 	cell_defaults.phenotype.death.rates[apoptosis_model_index ] = 0.0; 
 
 	// set oxygen uptake / secretion parameters for the default cell type 
-	//cell_defaults.phenotype.secretion.uptake_rates[oxygen_substrate_index] = 10; 
-	//cell_defaults.phenotype.secretion.secretion_rates[oxygen_substrate_index] = 0; 
-	//cell_defaults.phenotype.secretion.saturation_densities[oxygen_substrate_index] = 38; 
+	cell_defaults.phenotype.secretion.uptake_rates[oxygen_substrate_index] = 0; 
+	cell_defaults.phenotype.secretion.secretion_rates[oxygen_substrate_index] = 0; 
+	cell_defaults.phenotype.secretion.saturation_densities[oxygen_substrate_index] =0; 
 	
 	// add custom data here, if any 
 	
@@ -150,14 +150,14 @@ void create_cell_types( void )
 	
 	CellA.parameters.pReference_live_phenotype = &( CellA.phenotype ); 
 	//cell
-	int sub_index = microenvironment.find_density_index( "substrate" ); 
+	int sub_index = microenvironment.find_density_index( "Chemical_A" ); 
 	// enable random motility 
 	CellA.phenotype.motility.is_motile = false; 
-	//CellA.phenotype.secretion.uptake_rates[sub_index] = 0; 
-	//CellA.phenotype.secretion.secretion_rates[sub_index] = 0; 
-	//CellA.phenotype.secretion.saturation_densities[sub_index] = 100; 
+	CellA.phenotype.secretion.uptake_rates[sub_index] = 0; 
+	CellA.phenotype.secretion.secretion_rates[sub_index] = 0; 
+	CellA.phenotype.secretion.saturation_densities[sub_index] = 0; 
 	//CellA.phenotype.geometry.radius=100;
-	CellA.phenotype.volume.multiply_by_ratio(50);
+	//CellA.phenotype.volume.multiply_by_ratio(50);
 	//CellA.phenotype.motility.persistence_time = parameters.doubles( "CellA_persistence_time" ); // 15.0; 
 	//CellA.phenotype.motility.migration_speed = parameters.doubles( "CellA_migration_speed" ); // 0.25 micron/minute 
 	//CellA.phenotype.motility.migration_bias = 0.0;// completely random 
@@ -214,26 +214,48 @@ void setup_microenvironment( void )
 	// extra Dirichlet nodes here. 
 	
 	// initialize BioFVM 
-	
+	//default_microenvironment_options.outer_Dirichlet_conditions = true;
 	initialize_microenvironment();
 	bool make_Dirichlet_node=parameters.bools("make_Dirichlet_node");
 	
 	
 if (make_Dirichlet_node==true)
 {
-	std::vector<double> bc_vector( 2 );
-	bc_vector[0]=parameters.doubles("Concentration_of_oxygen");//getvalue
-	bc_vector[1]=parameters.doubles("Concentration_of_Chemical_A");//getvalue
+	
+
+	std::vector<double> dc_vector( 2 );
+	dc_vector[0]=parameters.doubles("Concentration_of_oxygen");//getvalue
+	dc_vector[1]=parameters.doubles("Concentration_of_Chemical_A");//getvalue
+	bool set_oxygen=parameters.bools("set_Dirichlet_condition_for_oxygen");//getvalue
+	bool set_Chemical_A=parameters.bools("set_Dirichlet_condition_for_Chemical_A");//getvalue
+	
 	double x= parameters.doubles("Dirichlet_node_position_x");//getx vale:
 	double y=  parameters.doubles("Dirichlet_node_position_y");//get yvalue
 	std::vector<double> position(2);
 	position[0]= x;
 	position[1]= y;
 	int voxel= microenvironment.nearest_voxel_index( position);
-	microenvironment.add_dirichlet_node( voxel,bc_vector );
+	microenvironment.add_dirichlet_node( voxel,dc_vector );
+	
+	 if (set_oxygen ==false){
+		
+		microenvironment.set_substrate_dirichlet_activation(0,voxel,false);
+	}
+	else {microenvironment.set_substrate_dirichlet_activation(0,voxel,true);}
+	if (set_Chemical_A==false)
+	{
+	microenvironment.set_substrate_dirichlet_activation(1,voxel,false);	
+	}
+	 
+	else {microenvironment.set_substrate_dirichlet_activation(1,voxel,true);}	
+	microenvironment.apply_dirichlet_conditions( ); 
+	
 //double x=
 	
-} 	
+} 
+
+
+
 	
 	return; 
 }
@@ -246,7 +268,7 @@ void setup_tissue( void )
 
 	pC = create_cell(CellA); 
 	pC->assign_position( 0.0, 0.0, 0.0 );
-
+	
 
 	
 	return; 
@@ -260,8 +282,10 @@ std::vector<std::string> my_coloring_function( Cell* pCell )
 		
 	if( pCell->phenotype.death.dead == false && pCell->type == 1 )
 	{
-		 output[0] = "blue"; 
-		 output[2] = "blue"; 
+		 output[0] = "none"; 
+		 output[1] = "none"; 
+		 output[2] = "none"; 
+		 output[3] = "none"; 
 	}
 	
 	return output; 
